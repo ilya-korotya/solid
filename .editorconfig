@@ -1,0 +1,9 @@
+[*]
+insert_final_newline = true
+
+[*.yml]
+indent_style = space
+indent_size = 2
+
+[*.go]
+indent_style = tab
