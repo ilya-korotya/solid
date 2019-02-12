@@ -1,17 +1,12 @@
 package main
 
-//
 import (
 	"database/sql"
 	"fmt"
 
 	"github.com/ilya-korotya/solid/database/postgres"
-
-	"github.com/ilya-korotya/solid/server/handler"
-	"github.com/ilya-korotya/solid/usecase"
-
 	"github.com/ilya-korotya/solid/server"
-
+	"github.com/ilya-korotya/solid/usecase"
 	_ "github.com/lib/pq"
 )
 
@@ -25,10 +20,9 @@ func main() {
 	}
 	store := postgres.NewUserStore(db)
 	usecase := usecase.NewUserInteractor(store)
-	handler := handler.New(usecase)
 	server := server.Server{
-		Port:    "8081",
-		Handler: handler,
+		Port:     "8080",
+		Handlers: usecase,
 	}
 	server.Run()
 }

@@ -4,13 +4,12 @@ import (
 	"database/sql"
 
 	"github.com/ilya-korotya/solid/entries"
-
 	_ "github.com/lib/pq"
 )
 
 const (
 	getUser    = "SELECT * FROM users WHERE id=$1 LIMIT 1"
-	getUsers   = "SELECT * FROM users"
+	getUsers   = "SELECT first_name, second_name, age FROM users"
 	createUser = "INSERT INTO users (first_name, second_name, age) VALUES ($1, $2, $3)"
 	deleteUser = "DELETE FROM WHERE id=$1"
 )

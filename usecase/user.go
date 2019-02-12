@@ -8,6 +8,7 @@ import (
 
 type UserUsecase interface {
 	Register(*Client) (bool, error)
+	Users() ([]*entries.User, error)
 }
 
 type UserInteractor struct {
@@ -32,6 +33,10 @@ func (u *UserInteractor) Register(client *Client) (bool, error) {
 	}
 	err = u.UserStore.CreateUser(user)
 	return true, InternalError.FromError(err)
+}
+
+func (u *UserInteractor) Users() ([]*entries.User, error) {
+	return u.UserStore.Users()
 }
 
 // Ideally, we should have created a separate response structure.
