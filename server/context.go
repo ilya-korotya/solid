@@ -3,12 +3,15 @@ package server
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/ilya-korotya/solid/entries"
 )
 
 // Context request with additional utilities
 type Context struct {
-	w http.ResponseWriter
-	r *http.Request
+	w  http.ResponseWriter
+	r  *http.Request
+	DB entries.UserStore
 }
 
 // Bind parse body to targger structure

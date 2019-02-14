@@ -2,37 +2,32 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+
+	"github.com/ilya-korotya/solid/entries"
 
 	"github.com/ilya-korotya/solid/usecase"
 )
 
-func proccesError(w http.ResponseWriter, code int, err error) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	d, _ := json.Marshal(map[string]error{"error": err})
-	w.Write(d)
+var defaultServer = &Server{
+	post: http.NewServeMux(),
+	get:  http.NewServeMux(),
+}
+
+func InstallDB(db entries.UserStore) {
+	defaultServer.DB = db
 }
 
 type Handle func(context *Context) error
-
-func (h Handle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	err := h(&Context{w: w, r: r})
-	if err != nil {
-		// TODO: implement full handle error
-		switch usecase.GetType(err) {
-		case usecase.BadRequest:
-			proccesError(w, http.StatusBadRequest, err)
-		}
-	}
-}
 
 type Server struct {
 	Address  string
 	Port     string
 	Handlers usecase.UserUsecase
-	post     http.ServeMux
-	get      http.ServeMux
+	DB       entries.UserStore
+	post     *http.ServeMux
+	get      *http.ServeMux
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -44,16 +39,39 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (r *Server) POST(pattern string, h Handle) {
-	r.post.Handle(pattern, h)
+func proccesError(w http.ResponseWriter, code int, err error) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	d, _ := json.Marshal(map[string]error{"error": err})
+	w.Write(d)
 }
 
-func (r *Server) GET(pattern string, h Handle) {
-	r.get.Handle(pattern, h)
+func (s *Server) initHandler(h Handle) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if err := h(&Context{
+			w:  w,
+			r:  r,
+			DB: s.DB,
+		}); err != nil {
+			fmt.Println("TODO: procces error:", err)
+		}
+	}
 }
 
-func (r *Server) Run() {
-	r.POST("/user", r.UserCreate)
-	r.GET("/users", r.Users)
-	http.ListenAndServe(r.Address+":"+r.Port, r)
+func POST(pattern string, h Handle, server *Server) {
+	if server == nil {
+		server = defaultServer
+	}
+	defaultServer.post.HandleFunc(pattern, server.initHandler(h))
+}
+
+func GET(pattern string, h Handle, server *Server) {
+	if server == nil {
+		server = defaultServer
+	}
+	defaultServer.get.HandleFunc(pattern, server.initHandler(h))
+}
+
+func Run(addres string) {
+	http.ListenAndServe(addres, defaultServer)
 }
