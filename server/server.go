@@ -2,10 +2,7 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
-
-	"github.com/ilya-korotya/solid/entries"
 
 	"github.com/ilya-korotya/solid/usecase"
 )
@@ -15,19 +12,16 @@ var defaultServer = &Server{
 	get:  http.NewServeMux(),
 }
 
-func InstallDB(db entries.UserStore) {
-	defaultServer.DB = db
+func InstallUserUsecase(uc usecase.UserUsecase) {
+	defaultServer.userUsecase = uc
 }
 
 type Handle func(context *Context) error
 
 type Server struct {
-	Address  string
-	Port     string
-	Handlers usecase.UserUsecase
-	DB       entries.UserStore
-	post     *http.ServeMux
-	get      *http.ServeMux
+	userUsecase usecase.UserUsecase
+	post        *http.ServeMux
+	get         *http.ServeMux
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -42,34 +36,37 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func proccesError(w http.ResponseWriter, code int, err error) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	d, _ := json.Marshal(map[string]error{"error": err})
+	d, _ := json.Marshal(map[string]string{"error": err.Error()})
 	w.Write(d)
 }
 
 func (s *Server) initHandler(h Handle) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if err := h(&Context{
-			w:  w,
-			r:  r,
-			DB: s.DB,
+			w:           w,
+			r:           r,
+			UserUsecase: s.userUsecase,
 		}); err != nil {
-			fmt.Println("TODO: procces error:", err)
+			switch usecase.GetType(err) {
+			case usecase.BadRequest:
+				proccesError(w, http.StatusBadRequest, err)
+			case usecase.NotFound:
+				proccesError(w, http.StatusNotFound, err)
+			case usecase.InternalError:
+				fallthrough
+			default:
+				proccesError(w, http.StatusInternalServerError, err)
+			}
 		}
 	}
 }
 
-func POST(pattern string, h Handle, server *Server) {
-	if server == nil {
-		server = defaultServer
-	}
-	defaultServer.post.HandleFunc(pattern, server.initHandler(h))
+func POST(pattern string, h Handle) {
+	defaultServer.post.HandleFunc(pattern, defaultServer.initHandler(h))
 }
 
-func GET(pattern string, h Handle, server *Server) {
-	if server == nil {
-		server = defaultServer
-	}
-	defaultServer.get.HandleFunc(pattern, server.initHandler(h))
+func GET(pattern string, h Handle) {
+	defaultServer.get.HandleFunc(pattern, defaultServer.initHandler(h))
 }
 
 func Run(addres string) {

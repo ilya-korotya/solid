@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ilya-korotya/solid/entries"
+	"github.com/ilya-korotya/solid/usecase"
 )
 
 // Context request with additional utilities
 type Context struct {
-	w  http.ResponseWriter
-	r  *http.Request
-	DB entries.UserStore
+	w           http.ResponseWriter
+	r           *http.Request
+	UserUsecase usecase.UserUsecase
 }
 
 // Bind parse body to targger structure

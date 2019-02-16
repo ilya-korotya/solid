@@ -7,6 +7,7 @@ import (
 	"github.com/ilya-korotya/solid/database/postgres"
 	_ "github.com/ilya-korotya/solid/handler"
 	"github.com/ilya-korotya/solid/server"
+	"github.com/ilya-korotya/solid/usecase"
 	_ "github.com/lib/pq"
 )
 
@@ -18,8 +19,8 @@ func main() {
 	if err := db.Ping(); err != nil {
 		panic(fmt.Sprint("Invalid connect to database:", err))
 	}
-	// store := postgres.NewUserStore(db)
-	// usecase := usecase.NewUserInteractor(store)
-	server.InstallDB(postgres.NewUserStore(db))
+	store := postgres.NewUserStore(db)
+	userUsecase := usecase.NewUserInteractor(store)
+	server.InstallUserUsecase(userUsecase)
 	server.Run(":8081")
 }

@@ -32,7 +32,7 @@ func (errorType ErrorType) Newf(msg string, args ...interface{}) error {
 	return customError{errorType: errorType, originalError: fmt.Errorf(msg, args...)}
 }
 
-func (errorType ErrorType) FromError(err error) error {
+func (errorType ErrorType) Wrap(err error) error {
 	return customError{errorType: errorType, originalError: err}
 }
 

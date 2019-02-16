@@ -29,10 +29,12 @@ type Client struct {
 func (u *UserInteractor) Register(client *Client) (bool, error) {
 	user, err := entries.NewUser(client.FirstName, client.SecondName, client.Age)
 	if err != nil {
-		return false, BadRequest.FromError(err)
+		return false, BadRequest.Wrap(err)
 	}
-	err = u.UserStore.CreateUser(user)
-	return true, InternalError.FromError(err)
+	if err = u.UserStore.CreateUser(user); err != nil {
+		return false, InternalError.Wrap(err)
+	}
+	return true, nil
 }
 
 func (u *UserInteractor) Users() ([]*entries.User, error) {

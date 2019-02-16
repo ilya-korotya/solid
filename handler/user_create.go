@@ -4,20 +4,23 @@ import (
 	"net/http"
 
 	"github.com/ilya-korotya/solid/server"
+	"github.com/ilya-korotya/solid/usecase"
 )
 
-func init() {
-	server.POST("/user", userCreate, nil)
-	server.GET("/users", users, nil)
-}
-
+/* TODO: we can implement level errors:
+   1. Entries level
+   2. Usescase level
+   3. Handler level
+   4. Database level
+   But this is logic stretched across the entire application
+**/
 func userCreate(c *server.Context) error {
-	return c.Response(http.StatusCreated, map[string]string{"result": "OK"})
-}
-
-func users(c *server.Context) error {
-	return c.Response(http.StatusOK, map[string]string{
-		"result1": "message1",
-		"result2": "message2",
-	})
+	client := &usecase.Client{}
+	if err := c.Bind(client); err != nil {
+		return err
+	}
+	if _, err := c.UserUsecase.Register(client); err != nil {
+		return err
+	}
+	return c.Response(http.StatusOK, client)
 }
