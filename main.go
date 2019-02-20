@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	db, err := sql.Open("postgres", "postgres://lowcoder:@localhost:5432/solid?sslmode=disable")
+	db, err := sql.Open("postgres", "postgres://lowcoder:@postgres:5432/solid?sslmode=disable")
 	if err != nil {
 		panic(fmt.Sprint("Invalid open connect to database:", err))
 	}
@@ -22,5 +22,5 @@ func main() {
 	store := postgres.NewUserStore(db)
 	userUsecase := usecase.NewUserInteractor(store)
 	server.InstallUserUsecase(userUsecase)
-	server.Run(":8081")
+	server.Run(":8080")
 }
