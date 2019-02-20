@@ -1,8 +1,12 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
+	"os/signal"
 
 	"github.com/ilya-korotya/solid/usecase"
 )
@@ -69,6 +73,20 @@ func GET(pattern string, h Handle) {
 	defaultServer.get.HandleFunc(pattern, defaultServer.initHandler(h))
 }
 
-func Run(addres string) {
-	http.ListenAndServe(addres, defaultServer)
+func Run(address string, done chan<- struct{}) error {
+	server := http.Server{
+		Addr:    address,
+		Handler: defaultServer,
+	}
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		<-sigint
+		if err := server.Shutdown(context.Background()); err != nil {
+			log.Println("Server off:", err)
+		}
+		// send default value to 'done' channel
+		close(done)
+	}()
+	return server.ListenAndServe()
 }
