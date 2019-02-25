@@ -22,7 +22,7 @@ build:
 
 # for testing full circle creating containers
 clear:
-	# with '|| true' we ignore error
+	# TODO: docker have functionality for remove all data 
 	docker stop $(docker_container_list) || true
 	docker rm $(docker_container_list) || true
 	docker rmi $(docker_image_list) || true
@@ -31,6 +31,11 @@ clear:
 rebuild:
 	docker stop solid || true
 	docker run -p 8080:8080 -d -v $(PWD):/go/src/github.com/ilya-korotya/solid --rm --name solid --network $(network) solid
+
+# when you do an graceful restart, the process starts as a daemon
+# and you can kill it with this command
+kill:
+	killall -9 solid
 
 # work with migration for postgres
 migration: 
