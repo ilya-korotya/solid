@@ -25,8 +25,11 @@ func main() {
 	store := postgres.NewUserStore(db)
 	userUsecase := usecase.NewUserInteractor(store)
 	server.InstallUserUsecase(userUsecase)
-	if err := server.Run(":8080", done); err != http.ErrServerClosed {
-		log.Println("Server is broke")
+	if err := server.Run(":8080", done); err != nil {
+		log.Println("Server is broke:", err)
+		// if we call Shutdown or Close
+		if err == http.ErrServerClosed {
+			<-done
+		}
 	}
-	<-done
 }
