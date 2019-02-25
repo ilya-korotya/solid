@@ -6,4 +6,5 @@ import "github.com/ilya-korotya/solid/server"
 func init() {
 	server.POST("/user", userCreate)
 	server.GET("/users", users)
+	server.GET("/time", foo)
 }
