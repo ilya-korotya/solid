@@ -14,10 +14,10 @@ type Context struct {
 	UserUsecase usecase.UserUsecase
 }
 
-// Bind parse body to targger structure
-func (c *Context) Bind(targger interface{}) error {
+// Bind parse body to target structure
+func (c *Context) Bind(target interface{}) error {
 	defer c.r.Body.Close()
-	return json.NewDecoder(c.r.Body).Decode(targger)
+	return json.NewDecoder(c.r.Body).Decode(target)
 }
 
 // Response sends data to client in JSON type
