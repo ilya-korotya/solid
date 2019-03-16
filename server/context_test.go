@@ -100,7 +100,7 @@ func TestResponse(t *testing.T) {
 			r := mock.w.Body.String()
 			t.Log("Actual response body:", r)
 			t.Log("Expected response body:", mock.result)
-			if mock.result != r {
+			if r != mock.result {
 				t.Errorf("The answer to the client does not match: %s != %s", r, mock.result)
 			}
 		})
