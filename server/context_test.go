@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/ilya-korotya/solid/usecase"
 )
 
 type personaMock struct {
@@ -100,6 +102,49 @@ func TestResponse(t *testing.T) {
 			r := mock.w.Body.String()
 			t.Log("Actual response body:", r)
 			t.Log("Expected response body:", mock.result)
+			if r != mock.result {
+				t.Errorf("The answer to the client does not match: %s != %s", r, mock.result)
+			}
+		})
+	}
+}
+
+func TestProcessError(t *testing.T) {
+	type bind struct {
+		w      *httptest.ResponseRecorder
+		body   error
+		result string
+		code   int
+		err    error
+	}
+	mocks := map[string]bind{
+		"Success proccese 'NotFound' error:": bind{
+			w:      httptest.NewRecorder(),
+			body:   usecase.NotFound.New("user id=20 not found in storage"),
+			result: `{"error":"user id=20 not found in storage"}`,
+			code:   http.StatusNotFound,
+			err:    usecase.NotFound.New("user id=20 not found in storage"),
+		},
+	}
+	for name, mock := range mocks {
+		t.Run(name, func(t *testing.T) {
+			c := Context{
+				w: mock.w,
+			}
+			err := c.ProcessError(mock.body)
+			if reflect.TypeOf(err) != reflect.TypeOf(mock.err) {
+				t.Errorf("Incorrectly proxied error type: %T != %T", err, mock.err)
+			}
+			ct := c.w.Header().Get("Content-Type")
+			if ct != "application/json" {
+				t.Errorf("Invalid heading reflecting content type: %s != %s", ct, "application/json")
+			}
+			if mock.w.Code != mock.code {
+				t.Errorf("Incorrectly installed HTTP status code in response: %v != %v", mock.w.Code, mock.code)
+			}
+			r := mock.w.Body.String()
+			t.Log("Actual response with error:", r)
+			t.Log("Expected response with error:", mock.result)
 			if r != mock.result {
 				t.Errorf("The answer to the client does not match: %s != %s", r, mock.result)
 			}
