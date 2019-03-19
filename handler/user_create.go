@@ -17,10 +17,10 @@ import (
 func userCreate(c *server.Context) error {
 	client := &usecase.Client{}
 	if err := c.Bind(client); err != nil {
-		return err
+		return c.ProcessError(err)
 	}
 	if _, err := c.UserUsecase.Register(client); err != nil {
-		return err
+		return c.ProcessError(err)
 	}
 	return c.Response(http.StatusOK, client)
 }

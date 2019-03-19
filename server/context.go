@@ -44,8 +44,28 @@ func (c *Context) Response(code int, body interface{}) error {
 // ProcessError proccess error and proxy it to loger
 func (c *Context) ProcessError(body error) error {
 	var code int
+	// TODO: add proff and monitor this shit
+	switch body.(type) {
+	case usecase.CustomError:
+		code = validateCustomError(body)
+	default:
+		code = validateBasicError(body)
+	}
 	c.w.Header().Set("Content-Type", "application/json")
-	switch usecase.GetType(body) {
+	switch body.(type) {
+	case usecase.CustomError:
+	}
+	d, err := json.Marshal(map[string]string{"error": body.Error()})
+	if err != nil {
+		return err
+	}
+	c.w.WriteHeader(code)
+	c.w.Write(d)
+	return body
+}
+
+func validateCustomError(err error) (code int) {
+	switch usecase.GetType(err) {
 	case usecase.BadRequest:
 		code = http.StatusBadRequest
 	case usecase.NotFound:
@@ -55,11 +75,15 @@ func (c *Context) ProcessError(body error) error {
 	default:
 		code = http.StatusInternalServerError
 	}
-	d, err := json.Marshal(map[string]string{"error": body.Error()})
-	if err != nil {
-		return err
+	return
+}
+
+func validateBasicError(err error) (code int) {
+	switch err.(type) {
+	case *json.SyntaxError:
+		code = http.StatusBadRequest
+	default:
+		code = http.StatusInternalServerError
 	}
-	c.w.WriteHeader(code)
-	c.w.Write(d)
-	return body
+	return
 }

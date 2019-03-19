@@ -5,16 +5,26 @@ import (
 	"github.com/ilya-korotya/solid/usecase"
 )
 
+// CallMock display callback call status
+type CallMock bool
+
+func (c CallMock) String() string {
+	if c {
+		return "CALL"
+	}
+	return "NO CALL"
+}
+
 // UserStore implement mock for user database
 type UserStore struct {
 	UserFn            func(id string) (*entries.User, error)
-	UserInvoked       bool
+	UserInvoked       CallMock
 	UsersFn           func() ([]*entries.User, error)
-	UsersInvoked      bool
+	UsersInvoked      CallMock
 	CreateUserFn      func(user *entries.User) error
-	CreateUserInvoked bool
+	CreateUserInvoked CallMock
 	DeleteUserFn      func(id string) error
-	DeleteUserInvoked bool
+	DeleteUserInvoked CallMock
 }
 
 func (u *UserStore) User(id string) (*entries.User, error) {
@@ -40,9 +50,9 @@ func (u *UserStore) DeleteUser(id string) error {
 // UserUsecase implement mock for user usecase
 type UserUsecase struct {
 	RegisterFn      func(*usecase.Client) (bool, error)
-	RegisterInvoked bool
+	RegisterInvoked CallMock
 	UsersFn         func() ([]*entries.User, error)
-	UsersInvoked    bool
+	UsersInvoked    CallMock
 }
 
 func (u *UserUsecase) Register(c *usecase.Client) (bool, error) {
