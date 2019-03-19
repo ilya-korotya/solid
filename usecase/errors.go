@@ -14,7 +14,7 @@ const (
 	NotFound
 )
 
-type customError struct {
+type CustomError struct {
 	errorType     ErrorType
 	originalError error
 }
@@ -25,23 +25,23 @@ type errorContext struct {
 }
 
 func (errorType ErrorType) New(msg string) error {
-	return customError{errorType: errorType, originalError: errors.New(msg)}
+	return CustomError{errorType: errorType, originalError: errors.New(msg)}
 }
 
 func (errorType ErrorType) Newf(msg string, args ...interface{}) error {
-	return customError{errorType: errorType, originalError: fmt.Errorf(msg, args...)}
+	return CustomError{errorType: errorType, originalError: fmt.Errorf(msg, args...)}
 }
 
 func (errorType ErrorType) Wrap(err error) error {
-	return customError{errorType: errorType, originalError: err}
+	return CustomError{errorType: errorType, originalError: err}
 }
 
-func (error customError) Error() string {
+func (error CustomError) Error() string {
 	return error.originalError.Error()
 }
 
 func GetType(err error) ErrorType {
-	if customErr, ok := err.(customError); ok {
+	if customErr, ok := err.(CustomError); ok {
 		return customErr.errorType
 	}
 	return NoType
