@@ -51,3 +51,5 @@ migrate-version:
 
 migrate-fix:
 	docker run  -v "$(PWD)/migrations/postgres":/migrations --network $(network) migrate/migrate -path=/migrations/ -database $(database_connect) force $(migration_version)
+
+# TODO: add command(s) for run unit tests and create coverage
