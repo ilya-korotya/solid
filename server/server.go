@@ -51,16 +51,8 @@ func (s *Server) initHandler(h Handle) func(http.ResponseWriter, *http.Request) 
 			r:           r,
 			UserUsecase: s.userUsecase,
 		}); err != nil {
-			switch usecase.GetType(err) {
-			case usecase.BadRequest:
-				proccesError(w, http.StatusBadRequest, err)
-			case usecase.NotFound:
-				proccesError(w, http.StatusNotFound, err)
-			case usecase.InternalError:
-				fallthrough
-			default:
-				proccesError(w, http.StatusInternalServerError, err)
-			}
+			// create logger with log level
+			log.Println("Some error:", err)
 		}
 	}
 }

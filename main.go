@@ -15,7 +15,7 @@ import (
 
 func main() {
 	done := make(chan struct{})
-	db, err := sql.Open("postgres", "postgres://lowcoder:@localhost:5432/solid?sslmode=disable")
+	db, err := sql.Open("postgres", "postgres://lowcoder:@postgres:5432/solid?sslmode=disable")
 	if err != nil {
 		panic(fmt.Sprint("Invalid open connect to database:", err))
 	}
