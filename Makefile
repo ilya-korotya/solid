@@ -11,8 +11,8 @@ install_pgcrypto_extension = $(shell psql -U postgres -d solid -h localhost -c "
 init-run: build run
 
 run:
-	docker run -p 5432:5432 -d --rm --name postgres --network $(network) postgres
-	# TODO: in bad case golang service will run before postgres service
+	docker run -p 5432:5432 -d -v $(PWD)/postgres-data:/var/lib/postgresql/data --rm --name postgres --network $(network) postgres
+	sleep 5
 	docker run -p 8080:8080 -d -v $(PWD):/go/src/github.com/ilya-korotya/solid --rm --name solid --network $(network) solid
 
 build:
