@@ -1,5 +1,6 @@
 *.exe
 solid
+postgres-data
 
 ## File with questions to Anton/Alex
 questions
