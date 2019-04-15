@@ -52,4 +52,10 @@ migrate-version:
 migrate-fix:
 	docker run  -v "$(PWD)/migrations/postgres":/migrations --network $(network) migrate/migrate -path=/migrations/ -database $(database_connect) force $(migration_version)
 
-# TODO: add command(s) for run unit tests and create coverage
+test:
+	docker exec solid go test ./... ${flags}
+
+coverage:
+	# TODO: run test without shell and set params for coverage
+	$(shell make test flags="-coverprofile=./out/coverage.out")
+	go tool cover -html=out/coverage.out
