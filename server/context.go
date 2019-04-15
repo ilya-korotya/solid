@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/ilya-korotya/solid/database/postgres"
 	"github.com/ilya-korotya/solid/usecase"
+	"github.com/lib/pq"
 )
 
 // Context request with additional utilities
@@ -46,15 +48,14 @@ func (c *Context) ProcessError(body error) error {
 	var code int
 	// TODO: add proff and monitor this shit
 	switch body.(type) {
+	case *pq.Error:
+		code = validateDbError(body.(*pq.Error))
 	case usecase.CustomError:
 		code = validateCustomError(body)
 	default:
 		code = validateBasicError(body)
 	}
 	c.w.Header().Set("Content-Type", "application/json")
-	switch body.(type) {
-	case usecase.CustomError:
-	}
 	d, err := json.Marshal(map[string]string{"error": body.Error()})
 	if err != nil {
 		return err
@@ -62,6 +63,14 @@ func (c *Context) ProcessError(body error) error {
 	c.w.WriteHeader(code)
 	c.w.Write(d)
 	return body
+}
+
+func validateDbError(err *pq.Error) (code int) {
+	switch err {
+	case postgres.ErrUniqUser:
+		code = http.StatusBadRequest
+	}
+	return
 }
 
 func validateCustomError(err error) (code int) {

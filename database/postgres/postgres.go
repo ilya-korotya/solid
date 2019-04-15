@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/ilya-korotya/solid/entries"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 const (
@@ -56,6 +56,10 @@ func (u *UserStore) Users() ([]*entries.User, error) {
 
 func (u *UserStore) CreateUser(user *entries.User) error {
 	_, err := u.DB.Exec(createUser, user.FirstName, user.SecondName, user.Age)
+	errs, ok := err.(*pq.Error)
+	if ok && errs.Code == "23505" {
+		return ErrUniqUser
+	}
 	return err
 }
 
