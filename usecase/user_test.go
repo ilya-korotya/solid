@@ -60,7 +60,7 @@ func TestRegister(t *testing.T) {
 				},
 			},
 			result: false,
-			err:    usecase.InternalError.New("invalid connect to store"),
+			err:    errors.New("invalid connect to store"),
 		},
 		"Success create new client:": bind{
 			client: &usecase.Client{

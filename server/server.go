@@ -51,7 +51,6 @@ func (s *Server) initHandler(h Handle) func(http.ResponseWriter, *http.Request) 
 			r:           r,
 			UserUsecase: s.userUsecase,
 		}); err != nil {
-			// create logger with log level
 			log.Println("Some error:", err)
 		}
 	}

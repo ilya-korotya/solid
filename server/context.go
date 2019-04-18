@@ -2,9 +2,9 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
-	"github.com/ilya-korotya/solid/database/postgres"
 	"github.com/ilya-korotya/solid/usecase"
 	"github.com/lib/pq"
 )
@@ -58,7 +58,7 @@ func (c *Context) ProcessError(body error) error {
 	c.w.Header().Set("Content-Type", "application/json")
 	d, err := json.Marshal(map[string]string{"error": body.Error()})
 	if err != nil {
-		return err
+		return fmt.Errorf("%s:%s", d, err)
 	}
 	c.w.WriteHeader(code)
 	c.w.Write(d)
@@ -66,8 +66,8 @@ func (c *Context) ProcessError(body error) error {
 }
 
 func validateDbError(err *pq.Error) (code int) {
-	switch err {
-	case postgres.ErrUniqUser:
+	switch err.Code {
+	case "23505":
 		code = http.StatusBadRequest
 	}
 	return
