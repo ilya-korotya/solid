@@ -32,7 +32,7 @@ func (u *UserInteractor) Register(client *Client) (bool, error) {
 		return false, BadRequest.Wrap(err)
 	}
 	if err = u.UserStore.CreateUser(user); err != nil {
-		return false, InternalError.Wrap(err)
+		return false, err
 	}
 	return true, nil
 }

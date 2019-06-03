@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	"github.com/ilya-korotya/solid/entries"
-	_ "github.com/lib/pq"
 )
 
 const (
